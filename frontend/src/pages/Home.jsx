@@ -31,7 +31,7 @@ export default function Home() {
             Create Battle Room
           </Link>
         </div>
-        
+
         <div className="bg-white text-gray-800 p-6 rounded-2xl shadow-xl w-72 text-center">
           <div className="flex justify-center mb-4">
             <div className="bg-blue-100 p-4 rounded-full">
@@ -47,3 +47,27 @@ export default function Home() {
             placeholder="Enter code"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
+          <Link to="/join" className="bg-blue-400 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold transition w-full inline-block text-center">
+            Join Battle
+          </Link>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-6 mb-10 z-10">
+        <div className="bg-purple-700 px-6 py-4 rounded-xl flex items-center gap-2">
+          <FaRobot /> AI-Generated Roasts
+        </div>
+        <div className="bg-purple-700 px-6 py-4 rounded-xl flex items-center gap-2">
+          <FaBolt /> Real-time Voting
+        </div>
+        <div className="bg-purple-700 px-6 py-4 rounded-xl flex items-center gap-2">
+          <FaCrown /> Become Meme Lord
+        </div>
+      </div>
+
+      <Link to="/hall-of-fame" className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-xl flex items-center gap-2 text-white font-semibold z-10">
+        <FaTrophy /> Hall of Fame
+      </Link>
+    </div>
+  );
+}
