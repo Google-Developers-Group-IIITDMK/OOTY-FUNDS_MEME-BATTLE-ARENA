@@ -98,3 +98,25 @@ export default function Arena() {
               const f = e.target.files?.[0];
               if (!f) return;
               const url = URL.createObjectURL(f);
+              setImageA(url);
+            }}
+          />
+          <MemeCard
+            title={`Meme B • ${votesB} votes (${pct(votesB)}%)`}
+            onVote={() => handleVote("B")}
+            disabled={hasVoted}
+            image={imageB}
+            onSelectImage={(e) => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              const url = URL.createObjectURL(f);
+              setImageB(url);
+            }}
+          />
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <Button onClick={() => setRoastOpen(true)}>🤖 Generate AI Roast</Button>
+          <Button variant="ghost" onClick={endRoundAndShowWinner}>🏁 End Round</Button>
+          <Button variant="outline" onClick={handleNewRound}>🔄 New Round</Button>
+        </div>
+      </div>
