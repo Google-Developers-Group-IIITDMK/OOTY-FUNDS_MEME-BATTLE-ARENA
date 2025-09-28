@@ -73,3 +73,28 @@ export default function Arena() {
     const b = votesB;
     let text = "It's a tie! Both memes share the crown 👑";
     if (a > b) text = `Meme A wins ${a}-${b}!`;
+    if (b > a) text = `Meme B wins ${b}-${a}!`;
+    setWinnerText(text);
+    setWinnerOpen(true);
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-r from-purple-800 to-pink-900 text-white p-6">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-extrabold mb-1">Battle Arena {roomName ? `• ${roomName}` : ''}</h1>
+        <div className="text-white/80 mb-6 flex items-center gap-4 flex-wrap">
+          {roomId && (
+            <span>Room: <span className="font-mono bg-white/10 px-2 py-0.5 rounded">{roomId}</span></span>
+          )}
+          <span>Round: <span className="font-mono">{roundId}</span></span>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <MemeCard
+            title={`Meme A • ${votesA} votes (${pct(votesA)}%)`}
+            onVote={() => handleVote("A")}
+            disabled={hasVoted}
+            image={imageA}
+            onSelectImage={(e) => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              const url = URL.createObjectURL(f);
