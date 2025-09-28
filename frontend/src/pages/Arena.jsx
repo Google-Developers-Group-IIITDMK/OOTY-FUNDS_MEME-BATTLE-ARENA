@@ -23,3 +23,28 @@ function MemeCard({ title, onVote, disabled, image, onSelectImage }) {
     </div>
   );
 }
+
+export default function Arena() {
+  const { roomId } = useParams();
+  const location = useLocation();
+  const roomName = location.state?.roomName || null;
+  const [votesA, setVotesA] = useState(0);
+  const [votesB, setVotesB] = useState(0);
+  const [roastOpen, setRoastOpen] = useState(false);
+  const [winnerOpen, setWinnerOpen] = useState(false);
+  const [winnerText, setWinnerText] = useState("");
+  const [imageA, setImageA] = useState("");
+  const [imageB, setImageB] = useState("");
+  const [roundId, setRoundId] = useState(() => `round-${Date.now()}`);
+  const [hasVoted, setHasVoted] = useState(false);
+
+  // Key helpers for localStorage
+  const voteKey = `arena-voted-${roomId || 'global'}-${roundId}`;
+
+  useEffect(() => {
+    // Check if the user already voted in this round
+    const v = localStorage.getItem(voteKey);
+    setHasVoted(!!v);
+  }, [voteKey]);
+
+  const totalVotes = votesA + votesB;
