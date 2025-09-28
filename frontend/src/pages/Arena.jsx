@@ -48,3 +48,28 @@ export default function Arena() {
   }, [voteKey]);
 
   const totalVotes = votesA + votesB;
+  const pct = (v) => (totalVotes === 0 ? 0 : Math.round((v / totalVotes) * 100));
+
+  function handleVote(side) {
+    if (hasVoted) return; // extra guard
+    if (side === "A") setVotesA((v) => v + 1);
+    if (side === "B") setVotesB((v) => v + 1);
+    localStorage.setItem(voteKey, "1");
+    setHasVoted(true);
+  }
+
+  function handleNewRound() {
+    setVotesA(0);
+    setVotesB(0);
+    setImageA("");
+    setImageB("");
+    const newId = `round-${Date.now()}`;
+    setRoundId(newId);
+    // hasVoted will be recomputed via effect for new voteKey
+  }
+
+  function endRoundAndShowWinner() {
+    const a = votesA;
+    const b = votesB;
+    let text = "It's a tie! Both memes share the crown 👑";
+    if (a > b) text = `Meme A wins ${a}-${b}!`;
