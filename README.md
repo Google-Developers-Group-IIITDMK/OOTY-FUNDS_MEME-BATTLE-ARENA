@@ -8,9 +8,9 @@ A real-time meme battle platform built with **Node.js, Express, and MongoDB**, f
 
 > **NOTE:** Replace these placeholders with actual screenshots from your running application!
 
-![Home Page](https://drive.google.com/file/d/1ubA4sKJtJyVZZ6vMNfYJGlfgOCDqzJBx/view?usp=sharing/800x400.png?text=Home+Page)  
-![Home Page](https://drive.google.com/file/d/1Sq4VA3GFppRtf5BPTwNDvXljy0lbfTa5/view?usp=sharing/800x400.png?text=Leaderboard)  
-![Battle Arena](https://drive.google.com/file/d/18oiU8IxzAdQSQ90kvdX9TCLj_lOBNAI2/view?usp=sharing/800x400.png?text=Battle+Arena)  
+![Home Page](./ottyfunds1.png)  
+![Home Page](./otty2.png)  
+![Battle Arena](./otty3.png)  
 
 ---
 
