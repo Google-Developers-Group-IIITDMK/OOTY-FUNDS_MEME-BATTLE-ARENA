@@ -5,12 +5,9 @@ A real-time meme battle platform built with **Node.js, Express, and MongoDB**, f
 ---
 
 ## 📸 Demo Images
-
-> **NOTE:** Replace these placeholders with actual screenshots from your running application!
-
-![Home Page](./ottyfunds1.png)  
-![Home Page](./otty2.png)  
-![Battle Arena](./otty3.png)  
+![Home Page](./ootyfunds1.png)  
+![Home Page](./ooty2.png)  
+![Battle Arena](./ooty3.png)  
 
 ---
 
