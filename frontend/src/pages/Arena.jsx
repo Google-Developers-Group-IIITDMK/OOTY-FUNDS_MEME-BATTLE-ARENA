@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
-import { uploadMeme, voteMeme } from "../api/memeApi.jsx"; // your API helpers
+import { voteMeme, uploadMeme } from "../api/memeApi";
 
 function MemeCard({ title, onVote, disabled, image, onSelectImage }) {
+
+  
+
   return (
     <div className="bg-white/10 border border-white/20 rounded-2xl p-4 text-white">
       <label className="aspect-square bg-black/30 rounded-xl mb-3 flex items-center justify-center text-4xl overflow-hidden cursor-pointer hover:bg-black/40 transition">
@@ -29,9 +32,8 @@ export default function Arena() {
   const { roomId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-
   const roomName = location.state?.roomName || null;
-
+  const API_URL = import.meta.env.VITE_SERVER || "http://localhost:3000";
   const [votesA, setVotesA] = useState(0);
   const [votesB, setVotesB] = useState(0);
   const [imageA, setImageA] = useState("");
@@ -43,7 +45,6 @@ export default function Arena() {
   const [winnerText, setWinnerText] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-
   const voteKey = `arena-voted-${roomId || 'global'}-${roundId}`;
 
   useEffect(() => {
@@ -53,6 +54,8 @@ export default function Arena() {
 
   const totalVotes = votesA + votesB;
   const pct = (v) => (totalVotes === 0 ? 0 : Math.round((v / totalVotes) * 100));
+  const user = JSON.parse(localStorage.getItem("user"));
+  const username = user.username;
 
   const handleNewRound = () => {
     setVotesA(0);
@@ -71,66 +74,110 @@ export default function Arena() {
     setWinnerOpen(true);
   };
 
-  const handleVote = async (side) => {
-    if (hasVoted) return;
+  // Arena Component State
+  const [memes, setMemes] = useState([
+    { image: "", memeId: null, votes: 0 }, 
+    { image: "", memeId: null, votes: 0 }, 
+  ]);
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please sign in first");
-      navigate("/signin");
-      return;
-    }
+const handleUpload = async (file, index) => {
+  if (!file) return;
+  setLoading(true);
 
-    const voteData = {
-      roomId,
-      roundId,
-      side, // "A" or "B"
-    };
-
-    try {
-      const res = await voteMeme(voteData, token);
-      if (res.data.success) {
-        if (side === "A") setVotesA((v) => v + 1);
-        if (side === "B") setVotesB((v) => v + 1);
-        localStorage.setItem(voteKey, "1");
-        setHasVoted(true);
-      } else {
-        alert(res.data.message || "Vote failed");
-      }
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Vote failed");
-    }
-  };
-
-  const handleUpload = async (file, side) => {
-    if (!file) return;
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please sign in first");
-      navigate("/signin");
-      return;
-    }
-
+  try {
+    // 1️⃣ Upload image to Cloudinary
     const formData = new FormData();
-    formData.append("meme", file);
-    formData.append("roomId", roomId);
-    formData.append("side", side);
+    formData.append("file", file);
+    formData.append("upload_preset", "ecommerce"); 
+     formData.append("cloud_name", "do9m8kc0b");
+
+    const cloudRes = await fetch(
+      "https://api.cloudinary.com/v1_1/do9m8kc0b/image/upload",
+      { method: "POST", body: formData }
+    );
+
+    if (!cloudRes.ok) throw new Error("Cloudinary upload failed");
+
+    const cloudData = await cloudRes.json();
+    console.log("Cloudinary response:", cloudData);
+
+    const imageURL = cloudData.secure_url;
+    if (!imageURL) throw new Error("Image URL not returned from Cloudinary");
+
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!roomId) throw new Error("Room ID is missing");
+    if (!user?.username) throw new Error("Username is missing");
+
+    const backendRes = await fetch(`${API_URL}/api/meme/upload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        roomCode: roomId,
+        username: user.username,
+        imageURL, // ✅ this is the key field your backend needs
+      }),
+    });
+
+    const data = await backendRes.json();
+    if (!data.success) throw new Error(data.error || "Backend upload failed");
+
+    // 3️⃣ Update state
+    const newMemes = [...memes];
+    newMemes[index] = {
+      image: imageURL,
+      memeId: data.meme._id,
+      votes: 0,
+    };
+    setMemes(newMemes);
+
+  } catch (err) {
+    console.error("Upload error:", err);
+    setMessage(err.message);
+    setTimeout(() => setMessage(""), 3000);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Handle Vote
+  const handleVote = async (index) => {
+    const token = localStorage.getItem("token");
+    const memeId = memes[index].memeId;
+
+    if (!memeId) {
+      setMessage("Upload a meme first!");
+      setTimeout(() => setMessage(""), 3000);
+      return;
+    }
 
     try {
-      setLoading(true);
-      const res = await uploadMeme(formData, token);
-      if (res.data?.url) {
-        if (side === "A") setImageA(res.data.url);
-        if (side === "B") setImageB(res.data.url);
-      } else {
-        alert("Upload failed");
-      }
+      const res = await fetch(`${API_URL}/api/meme/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ memeId, username }),
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+
+      const updatedMemes = [...memes];
+      updatedMemes[index].votes += 1; // locally update votes
+      setMemes(updatedMemes);
+
+      localStorage.setItem(voteKey, "true");
+      setHasVoted(true);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Upload failed");
-    } finally {
-      setLoading(false);
+      setMessage(err.message || "Vote failed!");
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
@@ -182,6 +229,7 @@ export default function Arena() {
             image={imageB}
             onSelectImage={(e) => handleUpload(e.target.files?.[0], "B")}
           />
+
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
