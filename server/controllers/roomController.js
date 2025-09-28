@@ -32,7 +32,6 @@ export const joinRoom = async (req, res) => {
         const { code } = req.params;
         const { username } = req.body;
 
-
         const room = await Room.findOne({ roomCode: code });
         if (!room) return res.status(404).json({ success: false, error: 'Room not found' });
 
