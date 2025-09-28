@@ -8,7 +8,8 @@ import Arena from './pages/Arena'
 import HallOfFame from './pages/HallOfFame'
 import NotFound from './pages/NotFound'
 import SignIn from './components/Signin'
-import ProtectedRoute from './components/ProtectedRoute'
+import ProtectedRoute from './components/ProtectedRoutes'
+import SignUp from './components/Signup'
 
 function App() {
   return (
@@ -17,7 +18,7 @@ function App() {
       <Routes>
         {/* Public route */}
         <Route path="/signin" element={<SignIn />} />
-
+        <Route path="/signup" element={<SignUp />} />
         {/* Protected routes */}
         <Route
           path="/"

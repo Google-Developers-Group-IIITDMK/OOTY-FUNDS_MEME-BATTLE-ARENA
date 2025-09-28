@@ -38,7 +38,7 @@ const SignUp = () => {
             const payload = { username, email, password };
             const headers = { "Content-Type": "application/json" };
 
-            const res = await axios.post(`${API_URL}/api/auth/register`, payload, {
+            const res = await axios.post(`${API_URL}/api/auth/signup`, payload, {
                 headers,
                 timeout: 12000,
             });
@@ -116,7 +116,7 @@ const SignUp = () => {
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     type="text"
-                                    className="mt-1 w-full rounded-xl bg-white/6 border border-white/10 backdrop-blur py-3 px-4 placeholder-white/50 text-white outline-none focus:border-[#f6c358]"
+                                    className="mt-1 w-full rounded-xl bg-white/6 border border-white/10 backdrop-blur py-3 px-4 placeholder-white/50 text-black outline-none focus:border-[#f6c358]"
                                     placeholder="Choose a username"
                                 />
                             </label>
@@ -129,7 +129,7 @@ const SignUp = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     type="email"
-                                    className="mt-1 w-full rounded-xl bg-white/6 border border-white/10 backdrop-blur py-3 px-4 placeholder-white/50 text-white outline-none focus:border-[#f6c358]"
+                                    className="mt-1 w-full rounded-xl bg-white/6 border border-white/10 backdrop-blur py-3 px-4 placeholder-white/50 text-black outline-none focus:border-[#f6c358]"
                                     placeholder="you@memebattle.gg"
                                 />
                             </label>
@@ -142,7 +142,7 @@ const SignUp = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     type="password"
-                                    className="mt-1 w-full rounded-xl bg-white/6 border border-white/10 backdrop-blur py-3 px-4 placeholder-white/50 text-white outline-none focus:border-[#f6c358]"
+                                    className="mt-1 w-full rounded-xl bg-white/6 border border-white/10 backdrop-blur py-3 px-4 placeholder-white/50 text-black outline-none focus:border-[#f6c358]"
                                     placeholder="Create a password"
                                 />
                             </label>
@@ -155,7 +155,7 @@ const SignUp = () => {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     type="password"
-                                    className="mt-1 w-full rounded-xl bg-white/6 border border-white/10 backdrop-blur py-3 px-4 placeholder-white/50 text-white outline-none focus:border-[#f6c358]"
+                                    className="mt-1 w-full rounded-xl bg-white/6 border border-white/10 backdrop-blur py-3 px-4 placeholder-white/50 text-black outline-none focus:border-[#f6c358]"
                                     placeholder="Repeat your password"
                                 />
                             </label>
@@ -204,7 +204,7 @@ const SignUp = () => {
                             </div>
 
                             <p className="mt-4 text-center text-xs text-white/70">
-                                Already have an account? <a href="#" className="text-white/90 font-medium">Sign in</a>
+                                Already have an account? <a href="/signin" className="text-white/90 font-medium">Sign in</a>
                             </p>
                         </form>
                     </section>
