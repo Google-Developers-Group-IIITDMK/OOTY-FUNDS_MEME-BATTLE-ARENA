@@ -18,3 +18,11 @@ function App() {
         <Route path="/join" element={<JoinRoom />} />
         <Route path="/room/:roomId" element={<Arena />} />
         <Route path="/arena" element={<Arena />} />
+        <Route path="/hall-of-fame" element={<HallOfFame />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  )
+}
+
+export default App
