@@ -2,12 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
-import { voteMeme, uploadMeme } from "../api/memeApi";
 
 function MemeCard({ title, onVote, disabled, image, onSelectImage }) {
-
-  
-
   return (
     <div className="bg-white/10 border border-white/20 rounded-2xl p-4 text-white">
       <label className="aspect-square bg-black/30 rounded-xl mb-3 flex items-center justify-center text-4xl overflow-hidden cursor-pointer hover:bg-black/40 transition">
@@ -16,7 +12,12 @@ function MemeCard({ title, onVote, disabled, image, onSelectImage }) {
         ) : (
           <span className="text-white/70">🖼️ Upload Meme</span>
         )}
-        <input type="file" accept="image/*" className="hidden" onChange={onSelectImage} />
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={onSelectImage}
+        />
       </label>
       <div className="flex items-center justify-between gap-2">
         <h3 className="font-semibold truncate">{title}</h3>
@@ -34,121 +35,111 @@ export default function Arena() {
   const navigate = useNavigate();
   const roomName = location.state?.roomName || null;
   const API_URL = import.meta.env.VITE_SERVER || "http://localhost:3000";
-  const [votesA, setVotesA] = useState(0);
-  const [votesB, setVotesB] = useState(0);
-  const [imageA, setImageA] = useState("");
-  const [imageB, setImageB] = useState("");
+
+  const [memes, setMemes] = useState([
+    { image: "", memeId: null, votes: 0 }, // Meme A
+    { image: "", memeId: null, votes: 0 }, // Meme B
+  ]);
   const [hasVoted, setHasVoted] = useState(false);
   const [roundId, setRoundId] = useState(() => `round-${Date.now()}`);
-  const [roastOpen, setRoastOpen] = useState(false);
-  const [winnerOpen, setWinnerOpen] = useState(false);
-  const [winnerText, setWinnerText] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const voteKey = `arena-voted-${roomId || 'global'}-${roundId}`;
+  const [winnerOpen, setWinnerOpen] = useState(false);
+  const [winnerText, setWinnerText] = useState("");
+  const voteKey = `arena-voted-${roomId || "global"}-${roundId}`;
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const username = user?.username;
 
   useEffect(() => {
+    // Check if user already voted
     const v = localStorage.getItem(voteKey);
     setHasVoted(!!v);
-  }, [voteKey]);
 
-  const totalVotes = votesA + votesB;
-  const pct = (v) => (totalVotes === 0 ? 0 : Math.round((v / totalVotes) * 100));
-  const user = JSON.parse(localStorage.getItem("user"));
-  const username = user.username;
+    // Fetch room memes on mount
+    const fetchRoom = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API_URL}/api/room/${roomId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "Failed to fetch room");
 
-  const handleNewRound = () => {
-    setVotesA(0);
-    setVotesB(0);
-    setImageA("");
-    setImageB("");
-    const newId = `round-${Date.now()}`;
-    setRoundId(newId);
-  };
-
-  const endRoundAndShowWinner = () => {
-    let text = "It's a tie! Both memes share the crown 👑";
-    if (votesA > votesB) text = `Meme A wins ${votesA}-${votesB}!`;
-    if (votesB > votesA) text = `Meme B wins ${votesB}-${votesA}!`;
-    setWinnerText(text);
-    setWinnerOpen(true);
-  };
-
-  // Arena Component State
-  const [memes, setMemes] = useState([
-    { image: "", memeId: null, votes: 0 }, 
-    { image: "", memeId: null, votes: 0 }, 
-  ]);
-
-const handleUpload = async (file, index) => {
-  if (!file) return;
-  setLoading(true);
-
-  try {
-    // 1️⃣ Upload image to Cloudinary
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "ecommerce"); 
-     formData.append("cloud_name", "do9m8kc0b");
-
-    const cloudRes = await fetch(
-      "https://api.cloudinary.com/v1_1/do9m8kc0b/image/upload",
-      { method: "POST", body: formData }
-    );
-
-    if (!cloudRes.ok) throw new Error("Cloudinary upload failed");
-
-    const cloudData = await cloudRes.json();
-    console.log("Cloudinary response:", cloudData);
-
-    const imageURL = cloudData.secure_url;
-    if (!imageURL) throw new Error("Image URL not returned from Cloudinary");
-
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    if (!roomId) throw new Error("Room ID is missing");
-    if (!user?.username) throw new Error("Username is missing");
-
-    const backendRes = await fetch(`${API_URL}/api/meme/upload`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        roomCode: roomId,
-        username: user.username,
-        imageURL, // ✅ this is the key field your backend needs
-      }),
-    });
-
-    const data = await backendRes.json();
-    if (!data.success) throw new Error(data.error || "Backend upload failed");
-
-    // 3️⃣ Update state
-    const newMemes = [...memes];
-    newMemes[index] = {
-      image: imageURL,
-      memeId: data.meme._id,
-      votes: 0,
+        // Map existing memes to our state
+        const roomMemes = data.room.memes || [];
+        const newMemes = memes.map((m, i) => {
+          if (roomMemes[i]) {
+            return {
+              image: roomMemes[i].imageURL,
+              memeId: roomMemes[i]._id,
+              votes: roomMemes[i].votes || 0,
+            };
+          }
+          return m;
+        });
+        setMemes(newMemes);
+      } catch (err) {
+        console.error(err);
+        setMessage(err.message);
+      }
     };
-    setMemes(newMemes);
 
-  } catch (err) {
-    console.error("Upload error:", err);
-    setMessage(err.message);
-    setTimeout(() => setMessage(""), 3000);
-  } finally {
-    setLoading(false);
-  }
-};
+    fetchRoom();
+  }, [API_URL, roomId]);
 
-  // Handle Vote
+  const totalVotes = memes[0].votes + memes[1].votes;
+  const pct = (v) => (totalVotes === 0 ? 0 : Math.round((v / totalVotes) * 100));
+
+  const handleUpload = async (file, index) => {
+    if (!file) return;
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "ecommerce");
+
+      const cloudRes = await fetch(
+        "https://api.cloudinary.com/v1_1/do9m8kc0b/image/upload",
+        { method: "POST", body: formData }
+      );
+      if (!cloudRes.ok) throw new Error("Cloudinary upload failed");
+      const cloudData = await cloudRes.json();
+
+      const imageURL = cloudData.secure_url;
+      if (!imageURL) throw new Error("Image URL missing");
+
+      // Send to backend
+      const token = localStorage.getItem("token");
+      const backendRes = await fetch(`${API_URL}/api/meme/upload`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ roomCode: roomId, username, imageURL }),
+      });
+      const data = await backendRes.json();
+      if (!data.success) throw new Error(data.error);
+
+      const newMemes = [...memes];
+      newMemes[index] = {
+        image: imageURL,
+        memeId: data.meme._id,
+        votes: 0,
+      };
+      setMemes(newMemes);
+    } catch (err) {
+      console.error(err);
+      setMessage(err.message);
+      setTimeout(() => setMessage(""), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleVote = async (index) => {
-    const token = localStorage.getItem("token");
     const memeId = memes[index].memeId;
-
     if (!memeId) {
       setMessage("Upload a meme first!");
       setTimeout(() => setMessage(""), 3000);
@@ -156,6 +147,7 @@ const handleUpload = async (file, index) => {
     }
 
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/api/meme/vote`, {
         method: "POST",
         headers: {
@@ -164,12 +156,11 @@ const handleUpload = async (file, index) => {
         },
         body: JSON.stringify({ memeId, username }),
       });
-
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
 
       const updatedMemes = [...memes];
-      updatedMemes[index].votes += 1; // locally update votes
+      updatedMemes[index].votes = data.meme.votes;
       setMemes(updatedMemes);
 
       localStorage.setItem(voteKey, "true");
@@ -179,6 +170,24 @@ const handleUpload = async (file, index) => {
       setMessage(err.message || "Vote failed!");
       setTimeout(() => setMessage(""), 3000);
     }
+  };
+
+  const handleNewRound = () => {
+    setMemes([
+      { image: "", memeId: null, votes: 0 },
+      { image: "", memeId: null, votes: 0 },
+    ]);
+    setRoundId(`round-${Date.now()}`);
+    setHasVoted(false);
+  };
+
+  const endRoundAndShowWinner = () => {
+    const [memeA, memeB] = memes;
+    let text = "It's a tie! Both memes share the crown 👑";
+    if (memeA.votes > memeB.votes) text = `Meme A wins ${memeA.votes}-${memeB.votes}!`;
+    if (memeB.votes > memeA.votes) text = `Meme B wins ${memeB.votes}-${memeA.votes}!`;
+    setWinnerText(text);
+    setWinnerOpen(true);
   };
 
   return (
@@ -204,9 +213,7 @@ const handleUpload = async (file, index) => {
           {roomId && (
             <span>
               Room:{" "}
-              <span className="font-mono bg-white/10 px-2 py-0.5 rounded">
-                {roomId}
-              </span>
+              <span className="font-mono bg-white/10 px-2 py-0.5 rounded">{roomId}</span>
             </span>
           )}
           <span>
@@ -216,20 +223,19 @@ const handleUpload = async (file, index) => {
 
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           <MemeCard
-            title={`Meme A • ${votesA} votes (${pct(votesA)}%)`}
-            onVote={() => handleVote("A")}
+            title={`Meme A • ${memes[0].votes} votes (${pct(memes[0].votes)}%)`}
+            onVote={() => handleVote(0)}
             disabled={hasVoted}
-            image={imageA}
-            onSelectImage={(e) => handleUpload(e.target.files?.[0], "A")}
+            image={memes[0].image}
+            onSelectImage={(e) => handleUpload(e.target.files?.[0], 0)}
           />
           <MemeCard
-            title={`Meme B • ${votesB} votes (${pct(votesB)}%)`}
-            onVote={() => handleVote("B")}
+            title={`Meme B • ${memes[1].votes} votes (${pct(memes[1].votes)}%)`}
+            onVote={() => handleVote(1)}
             disabled={hasVoted}
-            image={imageB}
-            onSelectImage={(e) => handleUpload(e.target.files?.[0], "B")}
+            image={memes[1].image}
+            onSelectImage={(e) => handleUpload(e.target.files?.[0], 1)}
           />
-
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
@@ -243,17 +249,11 @@ const handleUpload = async (file, index) => {
         </div>
       </div>
 
-      <Modal isOpen={roastOpen} onClose={() => setRoastOpen(false)} title="AI Roast">
-        <p className="text-gray-700">
-          This meme is so dated, even Internet Explorer left the chat. Try again with fewer pixels and more humor!
-        </p>
-      </Modal>
-
       <Modal isOpen={winnerOpen} onClose={() => setWinnerOpen(false)} title="Round Result">
         <p className="text-gray-700 mb-3">{winnerText}</p>
         <div className="text-gray-700 space-y-1">
-          <p>Meme A: {votesA} votes ({pct(votesA)}%)</p>
-          <p>Meme B: {votesB} votes ({pct(votesB)}%)</p>
+          <p>Meme A: {memes[0].votes} votes ({pct(memes[0].votes)}%)</p>
+          <p>Meme B: {memes[1].votes} votes ({pct(memes[1].votes)}%)</p>
         </div>
       </Modal>
 
