@@ -23,3 +23,27 @@ export default function Home() {
               <span className="text-orange-500 text-2xl">👥</span>
             </div>
           </div>
+          <h2 className="font-bold text-lg mb-2">Create Room</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Start a new meme battle and invite your friends!
+          </p>
+          <Link to="/create" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition w-full">
+            Create Battle Room
+          </Link>
+        </div>
+        
+        <div className="bg-white text-gray-800 p-6 rounded-2xl shadow-xl w-72 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-blue-100 p-4 rounded-full">
+              <FaTrophy className="text-blue-500 text-2xl" />
+            </div>
+          </div>
+          <h2 className="font-bold text-lg mb-2">Join Room</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Enter a room code to join the battle!
+          </p>
+          <input
+            type="text"
+            placeholder="Enter code"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
