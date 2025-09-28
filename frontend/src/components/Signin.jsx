@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 
-export default function MemeBattleSignIn() {
+const SignIn= ()=> {
     // UI state
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -35,13 +35,13 @@ export default function MemeBattleSignIn() {
             if (API_KEY) headers["x-api-key"] = API_KEY;
 
             const res = await axios.post(
-                `${API_URL}/auth/signin`,
+                `${API_URL}/api/auth/login`,
                 payload,
-                { headers, timeout: 12000 }
+                { headers, timeout: 12000}
             );
 
             if (res?.data?.token) {
-                localStorage.setItem("memebattle_token", res.data.token);
+                localStorage.setItem("token", res.data.token);
                 toast.success("Signed in successfully — welcome to Meme Battle Arena!");
             } else {
                 toast.error(res?.data?.message || "Unexpected response from server.");
@@ -58,7 +58,6 @@ export default function MemeBattleSignIn() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#7d1b5e] via-[#9a76b7] to-[#0ea5a4] p-6">
-            {/* Glass card */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -200,7 +199,6 @@ export default function MemeBattleSignIn() {
                                     Continue with Discord
                                 </button>
                             </div>
-
                             <p className="mt-4 text-center text-xs text-white/70">Don't have an account? <a href="#" className="text-white/90 font-medium">Create one</a></p>
                         </form>
                     </section>
@@ -209,3 +207,4 @@ export default function MemeBattleSignIn() {
         </div>
     );
 }
+export default SignIn;

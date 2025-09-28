@@ -7,18 +7,68 @@ import JoinRoom from './pages/JoinRoom'
 import Arena from './pages/Arena'
 import HallOfFame from './pages/HallOfFame'
 import NotFound from './pages/NotFound'
+import SignIn from './components/Signin'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/create" element={<CreateRoom />} />
-        <Route path="/join" element={<JoinRoom />} />
-        <Route path="/room/:roomId" element={<Arena />} />
-        <Route path="/arena" element={<Arena />} />
-        <Route path="/hall-of-fame" element={<HallOfFame />} />
+        {/* Public route */}
+        <Route path="/signin" element={<SignIn />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create"
+          element={
+            <ProtectedRoute>
+              <CreateRoom />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/join"
+          element={
+            <ProtectedRoute>
+              <JoinRoom />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/room/:roomId"
+          element={
+            <ProtectedRoute>
+              <Arena />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/arena"
+          element={
+            <ProtectedRoute>
+              <Arena />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hall-of-fame"
+          element={
+            <ProtectedRoute>
+              <HallOfFame />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
