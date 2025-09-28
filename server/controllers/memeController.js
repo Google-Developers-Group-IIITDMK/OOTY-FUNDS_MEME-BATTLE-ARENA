@@ -1,6 +1,6 @@
 import { getIO } from '../sockets/socketHandler.js';
-import Meme from '../models/Meme.js';
-import Room from '../models/Room.js';
+import Meme from '../models/meme.js';
+import Room from '../models/room.js';
 import User from '../models/user.js';
 import { generateCaptionForImage } from '../utils/geminiClient.js';
 

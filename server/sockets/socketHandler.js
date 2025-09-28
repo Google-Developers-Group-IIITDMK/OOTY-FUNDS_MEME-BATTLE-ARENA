@@ -1,6 +1,6 @@
 // src/sockets/socketHandler.js
-import Room from '../models/Room.js';
-import Meme from '../models/Meme.js';
+import Room from '../models/room.js';
+import Meme from '../models/meme.js';
 
 let ioRef;
 
