@@ -120,3 +120,20 @@ export default function Arena() {
           <Button variant="outline" onClick={handleNewRound}>🔄 New Round</Button>
         </div>
       </div>
+
+      <Modal isOpen={roastOpen} onClose={() => setRoastOpen(false)} title="AI Roast">
+        <p className="text-gray-700">
+          This meme is so dated, even Internet Explorer left the chat. Try again with fewer pixels and more humor!
+        </p>
+      </Modal>
+
+      <Modal isOpen={winnerOpen} onClose={() => setWinnerOpen(false)} title="Round Result">
+        <p className="text-gray-700 mb-3">{winnerText}</p>
+        <div className="text-gray-700 space-y-1">
+          <p>Meme A: {votesA} votes ({pct(votesA)}%)</p>
+          <p>Meme B: {votesB} votes ({pct(votesB)}%)</p>
+        </div>
+      </Modal>
+    </div>
+  );
+}
